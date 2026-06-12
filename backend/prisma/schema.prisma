@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  authId    String   @unique @map("auth_id")
+  username  String   @unique
+  email     String   @unique
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessions  LearningSession[]
+
+  @@map("users")
+}
+
+model LearningSession {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  title      String
+  userInput  String   @map("user_input")
+  status     String   @default("in_progress")
+  bookmarked Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User     @relation(fields: [userId], references: [id])
+  sandbox    Sandbox?
+
+  @@map("learning_sessions")
+}
+
+model Sandbox {
+  id               String   @id @default(uuid())
+  sessionId        String   @unique @map("session_id")
+  intent           String
+  topic            String
+  concept          String
+  difficulty       String
+  estimatedMinutes Int      @map("estimated_minutes")
+  skills           String[]
+  language         String
+  brokenCode       String   @map("broken_code")
+  solutionCode     String   @map("solution_code")
+  task             String
+  hints            String[]
+  explanation      String
+  quizQuestion     String   @map("quiz_question")
+  quizOptions      String[] @map("quiz_options")
+  quizCorrectIndex Int      @map("quiz_correct_index")
+  isSolved         Boolean  @default(false) @map("is_solved")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  session    LearningSession @relation(fields: [sessionId], references: [id])
+  attempts   Attempt[]
+
+  @@map("sandboxes")
+}
+
+model Attempt {
+  id            String   @id @default(uuid())
+  sandboxId     String   @map("sandbox_id")
+  submittedCode String   @map("submitted_code")
+  feedback      Json
+  score         Int
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  sandbox       Sandbox  @relation(fields: [sandboxId], references: [id])
+
+  @@map("attempts")
+}
