@@ -3,7 +3,6 @@
 
 import { create } from 'zustand'
 import type { AuthState, User } from '../types/index'
-
 // AuthStore extends AuthState and adds methods to update the state
 interface AuthStore extends AuthState {
   setUser: (user: User | null) => void
@@ -17,6 +16,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setUser: (user) => set({ user , isAuthenticated: !!user , isLoading: false }),
   setLoading: (isLoading) => set({ isLoading }),
 }))
+
 
 //setUser -> updates who logged in , setLoading -> updates the  loading state
 // state -> data, actions -> functions for change of the data 
