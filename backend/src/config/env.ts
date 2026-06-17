@@ -5,7 +5,7 @@ export const env = {
     supabaseUrl : process.env.SUPABASE_URL!,
     supabaseAnonKey : process.env.SUPABASE_ANON_KEY!,
     supabaseServiceRoleKey : process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    openaiApiKey : process.env.OPENAI_API_KEY!,
+    groqApiKey : process.env.GROQ_API_KEY!,
     port : process.env.PORT || '5000',
     jwtSecret : process.env.JWT_SECRET!,
     corsOrigin : process.env.CORS_ORIGIN || 'http://localhost:5173',

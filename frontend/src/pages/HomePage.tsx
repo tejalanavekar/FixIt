@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import { useThemeStore } from '../store/themeStore'
-import { useSidebarStore } from '../store/sideBarStore'
 
 const exampleChips = [
   'CORS blocked by policy',
@@ -20,10 +19,15 @@ export default function HomePage() {
 
 
 
-  const handleGenerate = () => {
-    if (!input.trim()) return
-    navigate('/playground', { state: { userInput: input } })
-  }
+  const handleGenerate = async () => {
+  if (!input.trim()) return
+
+  navigate('/playground', {
+    state: {
+      userInput: input,
+    },
+  })
+}
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
