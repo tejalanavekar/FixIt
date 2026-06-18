@@ -23,6 +23,8 @@ export default function PlaygroundPage() {
     const [showQuiz, setShowQuiz] = useState(false)
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
     const [showSolution, setShowSolution] = useState(false)
+    const [leftWidth, setLeftWidth] = useState(70)
+    const [isDragging, setIsDragging] = useState(false)
 
     useEffect(() => {
         if (!userInput) {
@@ -31,6 +33,46 @@ export default function PlaygroundPage() {
     }
     fetchSandbox()
     }, [])
+
+    useEffect(() => {
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return
+
+    const newWidth =
+      (e.clientX / window.innerWidth) * 100
+
+    if (newWidth > 40 && newWidth < 85) {
+      setLeftWidth(newWidth)
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+  }
+}, [isDragging])
+
+useEffect(() => {
+  if (isDragging) {
+    document.body.style.userSelect = 'none'
+    document.body.style.cursor = 'col-resize'
+  } else {
+    document.body.style.userSelect = ''
+    document.body.style.cursor = ''
+  }
+
+  return () => {
+    document.body.style.userSelect = ''
+    document.body.style.cursor = ''
+  }
+}, [isDragging])
 
     const fetchSandbox = async () => {
     try {
@@ -86,43 +128,57 @@ export default function PlaygroundPage() {
 
         {/* Top Bar */}
         <div className={`flex items-center justify-between px-6 py-3 border-b ${
-  isDark ? 'border-[#1e1e1e]' : 'border-gray-200'
+  isDark ? 'border-gray-500' : 'border-gray-200'
 }`}>
           <span className={`text-sm font-mono ${
-    isDark ? 'text-gray-400' : 'text-gray-600'
+    isDark ? 'text-gray-200' : 'text-gray-800'
   }`}>{userInput}</span>
           <button
             onClick={() => navigate('/home')}
-            className="flex items-center gap-1 text-gray-400 hover:text-white text-sm transition"
+            className={`flex items-center gap-1 text-sm font-bold transition ${
+  isDark
+    ? 'text-gray-400 hover:text-white'
+    : 'text-gray-700 hover:text-gray-900'
+}`}
           >
             ✏️ Edit
           </button>
         </div>
 
         {/* Concept Card — always visible */}
+        <div
+  className={`border-b ${
+    isDark ? 'border-gray-500' : 'border-gray-200'
+  }`}
+>
         <ConceptCard
           sandbox={sandbox}
           onLearnMore={() => setIsDrawerOpen(true)}
         />
+        </div>
 
         {/* Main Content */}
         <div className="flex flex-1 overflow-hidden">
 
           {/* Left — Code Editor */}
-          <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex flex-col overflow-hidden" style={{ width: `${leftWidth}%` }}>
 
             {/* Editor Header */}
             <div className={`flex items-center justify-between px-4 py-2 border-b ${
   isDark ? 'border-[#1e1e1e]' : 'border-gray-200 bg-gray-50'
 }`}>
-              <span className={`text-xs font-mono uppercase ${
-    isDark ? 'text-gray-500' : 'text-gray-400'
+              <span className={`text-sm font-mono uppercase ${
+    isDark ? 'text-gray-300' : 'text-gray-800'
   }`}>
                 {sandbox.language}
               </span>
               <button
                 onClick={() => navigator.clipboard.writeText(userCode)}
-                className="text-gray-500 hover:text-white text-xs transition"
+                className={`text-xs transition ${
+  isDark
+    ? 'text-gray-300 hover:text-white'
+    : 'text-gray-700 hover:text-gray-900'
+}`}
               >
                 Copy
               </button>
@@ -144,7 +200,7 @@ export default function PlaygroundPage() {
     ? 'border-blue-500/30 bg-blue-500/5'
     : 'border-blue-200 bg-blue-50'
 }`}>
-                <p className="text-blue-400 text-xs font-semibold mb-1">
+                <p className="text-blue-400 text-sm font-semibold mb-1">
                   📌 Your task
                 </p>
                 <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{sandbox.task}</p>
@@ -171,7 +227,9 @@ export default function PlaygroundPage() {
                       onClick={() => handleAnswerSelect(index)}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition border
                         ${selectedAnswer === null
-                          ? 'border-[#2a2a2a] text-gray-300 hover:border-blue-500'
+                          ? isDark
+    ? 'border-[#2a2a2a] text-gray-300 hover:border-blue-500'
+    : 'border-gray-300 text-gray-700 hover:border-blue-500 bg-white'
                           : selectedAnswer === index
                             ? index === sandbox.quizCorrectIndex
                               ? 'border-green-500 bg-green-500/10 text-green-400'
@@ -202,7 +260,11 @@ export default function PlaygroundPage() {
               {!showSolution && (
                 <button
                   onClick={() => setShowSolution(true)}
-                  className="text-gray-500 hover:text-gray-400 text-sm transition"
+                  className={`text-sm transition ${
+  isDark
+    ? 'text-gray-300 hover:text-white'
+    : 'text-gray-700 hover:text-gray-900'
+}`}
                 >
                   I give up, show solution
                 </button>
@@ -216,14 +278,45 @@ export default function PlaygroundPage() {
 
           </div>
 
+          <div
+  onMouseDown={() => setIsDragging(true)}
+  className="
+    w-2
+    relative
+    cursor-col-resize
+    hover:bg-blue-500/10
+    transition
+    flex-shrink-0
+  "
+>
+  <div
+    className="
+      absolute
+      left-1/2
+      top-0
+      -translate-x-1/2
+      h-full
+      w-[1px]
+      bg-[#2a2a2a]
+    "
+  />
+</div>
+
           {/* Right — Hints Panel */}
-          <HintsPanel
-            hints={sandbox.hints}
-            explanation={sandbox.conceptOverview}
-            solutionCode={sandbox.solutionCode}
-            showSolution={showSolution}
-            language={sandbox.language}
-          />
+          <div
+  style={{
+    width: `${100 - leftWidth}%`,
+  }}
+  className="overflow-hidden"
+>
+  <HintsPanel
+    hints={sandbox.hints}
+    explanation={sandbox.conceptOverview}
+    solutionCode={sandbox.solutionCode}
+    showSolution={showSolution}
+    language={sandbox.language}
+  />
+</div>
 
         </div>
 

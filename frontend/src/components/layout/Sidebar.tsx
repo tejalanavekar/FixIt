@@ -61,13 +61,15 @@ export default function Sidebar(){
 }`}>
 
       {/* Logo */}
-      <div className="p-4 flex items-center justify-between">
+      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-sm">⚡</span>
           </div>
           <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>FixIt</span>
         </div>
+
+        
         <button
     onClick={toggleSidebar}
     className={`text-2xl font-bold transition ${
@@ -81,7 +83,7 @@ export default function Sidebar(){
       </div>
 
       {/*New Session Button */}
-      <div className="p-3">
+      <div className="p-3 pt-1 pb-3">
         <button
           onClick={() => navigate('/home')}
           className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border transition text-sm

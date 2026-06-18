@@ -19,7 +19,8 @@ export interface SandboxResponse {
   solutionCode: string
   quizQuestion: string
   quizOptions: string[]
-  quizCorrectIndex: number
+  quizCorrectIndex: number,
+  skills: string[]
 }
 
 //Typescript types for exporting the interfaces 
