@@ -26,7 +26,8 @@ You must return ONLY a valid JSON object with exactly this structure:
   "solutionCode": "the correct working code",
   "quizQuestion": "question testing WHY the fix works",
   "quizOptions": ["option A", "option B", "option C", "option D"],
-  "quizCorrectIndex": 0
+  "quizCorrectIndex": 0,
+  "skills": ["skill1", "skill2", "skill3"]
 }
 
 Rules:

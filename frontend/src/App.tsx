@@ -5,6 +5,8 @@ import SignUpPage from './pages/SignUpPage'
 import HomePage from './pages/HomePage'
 import AppLayout from './components/layout/AppLayout'
 import { useThemeStore } from './store/themeStore'
+import PlaygroundPage from './pages/PlaygroundPage'
+
 
 function App() {
   const { isDark } = useThemeStore()
@@ -23,6 +25,7 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/playground" element={<PlaygroundPage />} />
       </Routes>
     </BrowserRouter>
     

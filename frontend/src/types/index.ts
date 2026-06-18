@@ -35,4 +35,5 @@ export interface SandboxResponse {
   quizQuestion: string
   quizOptions: string[]
   quizCorrectIndex: number
+  skills?: string[]
 }

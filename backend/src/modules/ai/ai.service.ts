@@ -30,7 +30,8 @@ const SandboxSchema = z.object({
   solutionCode: z.string(),
   quizQuestion: z.string(),
   quizOptions: z.array(z.string()).length(4),
-  quizCorrectIndex: z.number().min(0).max(3)
+  quizCorrectIndex: z.number().min(0).max(3),
+  skills: z.array(z.string()).optional().default([])
 })
 
 export type SandboxData = z.infer<typeof SandboxSchema>
