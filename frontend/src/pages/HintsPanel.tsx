@@ -7,6 +7,7 @@ interface HintsPanelProps {
   solutionCode: string;
   showSolution: boolean;
   language: string;
+  onUseSolution: () => void;
 }
 
 type Tab = "hints" | "explanation" | "solution";
@@ -16,11 +17,19 @@ export default function HintsPanel({
   explanation,
   solutionCode,
   showSolution,
+  onUseSolution,
 }: HintsPanelProps) {
   const { isDark } = useThemeStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("hints");
   const [revealedHints, setRevealedHints] = useState<number[]>([]);
+  const [justCopied, setJustCopied] = useState(false);
+
+  const handleUseSolution = () => {
+    onUseSolution();
+    setJustCopied(true);
+    setTimeout(() => setJustCopied(false), 1500);
+  };
 
   const revealHint = (index: number) => {
     if (!revealedHints.includes(index)) {
@@ -149,9 +158,21 @@ export default function HintsPanel({
 
         {activeTab === "solution" && showSolution && (
           <div>
-            <p className="text-yellow-500 text-sm mb-3">
-              ⚠️ Try to solve it yourself first!
-            </p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-yellow-500 text-sm">
+                ⚠️ Try to solve it yourself first!
+              </p>
+              <button
+                onClick={handleUseSolution}
+                className={`text-xs font-semibold px-2 py-1 rounded transition ${
+                  isDark
+                    ? "text-blue-300 hover:bg-[#2a2a2a]"
+                    : "text-blue-600 hover:bg-gray-100"
+                }`}
+              >
+                {justCopied ? "✅ Added to editor" : "📋 Use this code"}
+              </button>
+            </div>
 
             <pre
               className={`text-sm font-mono p-3 rounded-lg overflow-x-auto whitespace-pre-wrap ${

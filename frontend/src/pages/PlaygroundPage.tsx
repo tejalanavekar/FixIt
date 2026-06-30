@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import type { SandboxResponse } from '../types'
-import { generateSandbox } from '../services/sandbox.service'
+import { generateSandbox, retryQuiz } from '../services/sandbox.service'
+import { createSession, updateSession, updateSandbox as persistSandbox, submitAttempt, getSessionDetail, sandboxRowToResponse } from '../services/session.service'
 import AppLayout from '../components/layout/AppLayout'
 import { useThemeStore } from '../store/themeStore'
 import ConceptCard from './ConceptCard'
@@ -12,7 +13,8 @@ import ConceptDrawer from './ConceptDrawer'
 export default function PlaygroundPage() {
     const location = useLocation()
     const navigate = useNavigate()
-    const userInput = location.state?.userInput as string 
+    const userInput = location.state?.userInput as string
+    const resumedSessionId = location.state?.sessionId as string | undefined
     const { isDark } = useThemeStore()
     const [sandbox, setSandbox] = useState<SandboxResponse | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -25,14 +27,75 @@ export default function PlaygroundPage() {
     const [showSolution, setShowSolution] = useState(false)
     const [leftWidth, setLeftWidth] = useState(70)
     const [isDragging, setIsDragging] = useState(false)
+    const [sessionId, setSessionId] = useState<string | null>(resumedSessionId ?? null)
+    const [isQuizCorrect, setIsQuizCorrect] = useState<boolean | null>(null)
+    const [isRetryingQuiz, setIsRetryingQuiz] = useState(false)
+    // Tracks which navigation (session id, or a fresh prompt) this component last loaded.
+    // The same /playground route instance is reused across sidebar clicks (no remount),
+    // so without this every other session would keep showing the first one's content.
+    // Comparing against the key also absorbs React StrictMode's double-invoke in dev,
+    // which would otherwise call fetchSandbox twice and create two sessions per prompt.
+    const loadedKeyRef = useRef<string | null>(null)
 
     useEffect(() => {
-        if (!userInput) {
+        if (!userInput && !resumedSessionId) {
       navigate('/home')
       return
     }
+    const key = resumedSessionId ?? `new:${userInput}`
+    if (loadedKeyRef.current === key) return
+    loadedKeyRef.current = key
+
+    if (resumedSessionId) {
+      resumeSession(resumedSessionId)
+      return
+    }
     fetchSandbox()
-    }, [])
+    }, [resumedSessionId, userInput])
+
+    const resetQuizState = () => {
+      setSelectedAnswer(null)
+      setIsQuizCorrect(null)
+      setShowSolution(false)
+      setIsSolved(false)
+      setShowQuiz(false)
+    }
+
+    const resumeSession = async (id: string) => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      resetQuizState()
+      const { session, sandbox: sandboxRow } = await getSessionDetail(id)
+      const data = sandboxRowToResponse(sandboxRow, session.title)
+      setSandbox(data)
+      setSessionId(session.id)
+      setUserCode(sandboxRow.current_code || sandboxRow.broken_code)
+      if (sandboxRow.progress >= 50) {
+        setIsSolved(true)
+        setShowQuiz(true)
+      }
+      if (sandboxRow.is_solved) {
+        setSelectedAnswer(sandboxRow.quiz_correct_index)
+        setIsQuizCorrect(true)
+      }
+    } catch {
+      setError('Failed to load session. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoHome = async () => {
+    if (sessionId) {
+      try {
+        await persistSandbox(sessionId, { currentCode: userCode })
+      } catch {
+        // best-effort save — don't block navigation on it
+      }
+    }
+    navigate('/home')
+  }
 
     useEffect(() => {
   const handleMouseMove = (e: MouseEvent) => {
@@ -78,9 +141,13 @@ useEffect(() => {
     try {
       setIsLoading(true)
       setError(null)
+      resetQuizState()
+      setSessionId(null)
       const data = await generateSandbox(userInput)
       setSandbox(data)
       setUserCode(data.brokenCode)
+      const { session } = await createSession(data.title, userInput, data)
+      setSessionId(session.id)
     } catch (err) {
       setError('Failed to generate sandbox. Please try again.')
     } finally {
@@ -91,9 +158,41 @@ useEffect(() => {
   const handleSubmit = () => {
     setIsSolved(true)
     setShowQuiz(true)
+    if (sessionId) persistSandbox(sessionId, { progress: 50 }).catch(() => {})
   }
-  const handleAnswerSelect = (index: number) => {
+
+  const handleAnswerSelect = async (index: number) => {
+    if (!sandbox || selectedAnswer !== null) return
     setSelectedAnswer(index)
+    const correct = index === sandbox.quizCorrectIndex
+    setIsQuizCorrect(correct)
+
+    if (sessionId) {
+      submitAttempt(sessionId, userCode, correct).catch(() => {})
+      if (correct) {
+        updateSession(sessionId, { status: 'completed' }).catch(() => {})
+        persistSandbox(sessionId, { isSolved: true, progress: 100 }).catch(() => {})
+      } else {
+        persistSandbox(sessionId, { progress: 75 }).catch(() => {})
+      }
+    }
+  }
+
+  const handleRetryQuiz = async () => {
+    if (!sandbox) return
+    try {
+      setIsRetryingQuiz(true)
+      const newQuiz = await retryQuiz(sandbox.concept, sandbox.quizQuestion)
+      const updatedSandbox = { ...sandbox, ...newQuiz }
+      setSandbox(updatedSandbox)
+      setSelectedAnswer(null)
+      setIsQuizCorrect(null)
+      if (sessionId) persistSandbox(sessionId, newQuiz).catch(() => {})
+    } catch {
+      setError('Failed to generate a new question. Please try again.')
+    } finally {
+      setIsRetryingQuiz(false)
+    }
   }
 
   if (isLoading) {
@@ -112,7 +211,7 @@ useEffect(() => {
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <p className="text-red-400">{error}</p>
           <button
-            onClick={fetchSandbox}
+            onClick={() => (resumedSessionId ? resumeSession(resumedSessionId) : fetchSandbox())}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
           >
             Try Again
@@ -133,16 +232,28 @@ useEffect(() => {
           <span className={`text-sm font-mono ${
     isDark ? 'text-gray-200' : 'text-gray-800'
   }`}>{userInput}</span>
-          <button
-            onClick={() => navigate('/home')}
-            className={`flex items-center gap-1 text-sm font-bold transition ${
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleGoHome}
+              className={`flex items-center gap-1 text-sm font-bold transition ${
   isDark
     ? 'text-gray-400 hover:text-white'
     : 'text-gray-700 hover:text-gray-900'
 }`}
-          >
-            ✏️ Edit
-          </button>
+            >
+              🏠 Home
+            </button>
+            <button
+              onClick={handleGoHome}
+              className={`flex items-center gap-1 text-sm font-bold transition ${
+  isDark
+    ? 'text-gray-400 hover:text-white'
+    : 'text-gray-700 hover:text-gray-900'
+}`}
+            >
+              ✏️ Edit
+            </button>
+          </div>
         </div>
 
         {/* Concept Card — always visible */}
@@ -243,6 +354,31 @@ useEffect(() => {
                     </button>
                   ))}
                 </div>
+
+                {selectedAnswer !== null && isQuizCorrect === false && (
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-red-400 text-xs">Not quite — want another shot?</span>
+                    <button
+                      onClick={handleRetryQuiz}
+                      disabled={isRetryingQuiz}
+                      className="text-xs font-semibold text-purple-400 hover:text-purple-300 disabled:opacity-50 transition"
+                    >
+                      {isRetryingQuiz ? 'Loading new question…' : 'Try a different question →'}
+                    </button>
+                  </div>
+                )}
+
+                {selectedAnswer !== null && isQuizCorrect === true && (
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-green-400 text-xs">Nailed it! 🎉</span>
+                    <button
+                      onClick={handleGoHome}
+                      className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition"
+                    >
+                      🏠 Home
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -315,6 +451,7 @@ useEffect(() => {
     solutionCode={sandbox.solutionCode}
     showSolution={showSolution}
     language={sandbox.language}
+    onUseSolution={() => setUserCode(sandbox.solutionCode)}
   />
 </div>
 

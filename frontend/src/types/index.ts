@@ -37,3 +37,34 @@ export interface SandboxResponse {
   quizCorrectIndex: number
   skills?: string[]
 }
+
+// New interfaces for database tables
+export interface LearningSession {
+  id: string
+  userId: string
+  title: string
+  userInput: string
+  status: 'in_progress' | 'completed' | 'gave_up'
+  bookmarked: boolean
+  completedAt: string | null
+  createdAt: string
+}
+
+export interface Attempt {
+  id: string
+  sandboxId: string
+  submittedCode: string
+  feedback: object
+  score: number
+  attemptNumber: number | null
+  isCorrect: boolean
+  createdAt: string
+}
+
+export interface Sandbox {
+  id: string
+  sessionId: string
+  isSolved: boolean
+  solutionViewed: boolean
+  createdAt: string
+}

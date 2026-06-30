@@ -5,6 +5,7 @@ import { create } from 'zustand'
 interface ThemeStore {
   isDark: boolean
   toggleTheme: () => void
+  setTheme: (isDark: boolean) => void
 }
 
 export const useThemeStore = create<ThemeStore>((set) => ({
@@ -13,4 +14,5 @@ export const useThemeStore = create<ThemeStore>((set) => ({
     set((state) => ({
       isDark: !state.isDark,
     })),
+  setTheme: (isDark) => set({ isDark }),
 }))

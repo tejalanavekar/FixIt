@@ -2,7 +2,7 @@
 import OpenAI from 'openai'
 import { z } from 'zod'
 import { env } from '../../config/env'
-import { SANDBOX_SYSTEM_PROMPT, userPrompt } from './ai.prompts';
+import { SANDBOX_SYSTEM_PROMPT, userPrompt, QUIZ_RETRY_SYSTEM_PROMPT, quizRetryPrompt } from './ai.prompts';
 
 export const openai = new OpenAI({
   apiKey: env.groqApiKey,
@@ -81,4 +81,43 @@ export const generateSandbox = async (userInput: string): Promise<SandboxData> =
 
   return result.data
 
+}
+
+const QuizRetrySchema = z.object({
+  quizQuestion: z.string(),
+  quizOptions: z.array(z.string()).length(4),
+  quizCorrectIndex: z.number().min(0).max(3)
+})
+
+export type QuizRetryData = z.infer<typeof QuizRetrySchema>
+
+export const regenerateQuiz = async (concept: string, previousQuestion: string): Promise<QuizRetryData> => {
+  const completion = await openai.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: QUIZ_RETRY_SYSTEM_PROMPT },
+      { role: 'user', content: quizRetryPrompt(concept, previousQuestion) }
+    ],
+    temperature: 0.7,
+    max_tokens: 500
+  })
+
+  const rawContent = completion.choices[0]?.message?.content
+  if (!rawContent) throw new Error('OpenAI returned empty response')
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(rawContent)
+  } catch {
+    throw new Error('OpenAI returned invalid JSON')
+  }
+
+  const result = QuizRetrySchema.safeParse(parsed)
+  if (!result.success) {
+    console.error('Zod validation failed:', result.error.issues)
+    throw new Error('AI response did not match expected schema')
+  }
+
+  return result.data
 }

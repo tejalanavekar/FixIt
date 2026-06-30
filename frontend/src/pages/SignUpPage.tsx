@@ -35,6 +35,23 @@ export default function SignUpPage() {
             return
         }
 
+        if (data.user) {
+    const { error: profileError } = await supabase
+      .from('users')
+      .insert({
+        auth_id: data.user.id,
+        username: name,
+        email: email
+      })
+
+    if (profileError) {
+      console.error('Profile insert error:', profileError)
+      setError('Account created but profile save failed: ' + profileError.message)
+      setIsLoading(false)
+      return
+    }
+  }
+
         if (data.session) {
   navigate('/home')
 } else {
@@ -43,22 +60,6 @@ export default function SignUpPage() {
 }
 
         // If signup successful, save user profile with name
-        if (data.user) {
-            const { error: profileError } = await supabase
-                .from('users')
-                .insert([
-                    {
-                        auth_id: data.user.id,
-                        username: name,
-                        email: email
-                    }
-                ])
-
-            if (profileError) {
-                console.error('Error saving profile:', profileError)
-            }
-        }
-
         // Navigate to home
         setSuccessMessage('Account created successfully!')
         navigate('/home')

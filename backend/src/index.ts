@@ -4,6 +4,7 @@ import cors from 'cors'
 import { env } from './config/env'
 import { supabase } from './config/db'
 import sandboxRoutes from './modules/sandbox/sandbox.routes'
+import sessionsRoutes from './modules/sessions/sessions.routes'
 
 const app = express()
 app.use(cors(
@@ -15,6 +16,7 @@ app.use(cors(
 app.use(express.json()) 
 
 app.use('/api/sandbox', sandboxRoutes)
+app.use('/api/sessions', sessionsRoutes)
 
 app.get('/api/health', async (req, res) => {
   try {

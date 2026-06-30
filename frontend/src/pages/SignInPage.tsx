@@ -180,14 +180,6 @@ export default function SignInPage() {
           </Link>
         </p>
       </div>
-
-      {/* Guest */}
-      <button
-        onClick={() => navigate('/home')}
-        className="text-gray-400 text-base mt-4 hover:text-gray-300 transition"
-      >
-        Continue as guest →
-      </button>
     </div>
   )
 

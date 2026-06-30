@@ -42,3 +42,20 @@ Rules:
 export const userPrompt = (userInput: string): string => {
   return `The user wants to learn about or fix this: "${userInput}". Generate a learning sandbox for this topic.`
 }
+
+export const QUIZ_RETRY_SYSTEM_PROMPT = `
+You write a single follow-up quiz question for a software engineering tutor.
+Return ONLY a valid JSON object with exactly this structure:
+{
+  "quizQuestion": "question testing WHY the fix works",
+  "quizOptions": ["option A", "option B", "option C", "option D"],
+  "quizCorrectIndex": 0
+}
+Rules:
+- Must test the same concept from a different angle than the previous question
+- Never return markdown, never wrap in code fences, return JSON only
+`
+
+export const quizRetryPrompt = (concept: string, previousQuestion: string): string => {
+  return `The concept is "${concept}". The user got this question wrong: "${previousQuestion}". Write a new question testing the same concept.`
+}

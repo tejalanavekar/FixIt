@@ -2,7 +2,7 @@
 //Received HTTP request -> validate input -> call AI -> response with result
 
 import { Request, Response } from 'express'
-import { generateSandbox } from '../ai/ai.service'
+import { generateSandbox, regenerateQuiz } from '../ai/ai.service'
 
 export const generate = async (req: Request, res: Response) =>{
     try {
@@ -20,5 +20,19 @@ export const generate = async (req: Request, res: Response) =>{
     } catch (error) {
         console.error('Sandbox generation error:', error)
         res.status(500).json({ error: 'Failed to generate sandbox', message: error instanceof Error ? error.message : 'Unknown error' })
+    }
+}
+
+export const retryQuiz = async (req: Request, res: Response) => {
+    try {
+        const { concept, previousQuestion } = req.body
+        if (!concept || !previousQuestion) {
+            return res.status(400).json({ error: 'concept and previousQuestion are required' })
+        }
+        const quiz = await regenerateQuiz(concept, previousQuestion)
+        return res.status(200).json({ quiz })
+    } catch (error) {
+        console.error('Quiz retry error:', error)
+        res.status(500).json({ error: 'Failed to generate a new question' })
     }
 }
