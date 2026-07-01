@@ -5,6 +5,7 @@ import type { Session } from '@supabase/supabase-js'
 import { useThemeStore } from '../../store/themeStore'
 import { useSidebarStore } from '../../store/sideBarStore'
 import { useSessionsStore } from '../../store/sessionsStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import { updateSession, deleteSession, type SessionRow } from '../../services/session.service'
 
 function groupSessions(sessions: SessionRow[]) {
@@ -42,8 +43,9 @@ export default function Sidebar() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const editInputRef = useRef<HTMLInputElement>(null)
-  const { isDark, setTheme } = useThemeStore()
+  const { isDark } = useThemeStore()
   const { toggleSidebar } = useSidebarStore()
+  const openSettings = useSettingsStore((s) => s.open)
 
   useEffect(() => {
     const getSesssion = async () => {
@@ -242,25 +244,7 @@ export default function Sidebar() {
       </div>
 
       {/* Footer — fixed at the bottom, never scrolls with the session list */}
-      <div className="p-3 border-t border-[#1e1e1e] space-y-2 flex-shrink-0">
-        {/* Theme Toggle — click the mode you want, not a switch */}
-        <div className={`flex items-center rounded-lg overflow-hidden border ${isDark ? 'border-[#2a2a2a]' : 'border-gray-300'}`}>
-          <button
-            onClick={() => setTheme(false)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-sm transition
-              ${!isDark ? 'bg-blue-600 text-white' : isDark ? 'text-gray-400 hover:bg-[#1a1a1a]' : 'text-gray-600 hover:bg-gray-100'}`}
-          >
-            ☀️ Light
-          </button>
-          <button
-            onClick={() => setTheme(true)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-sm transition
-              ${isDark ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-          >
-            🌙 Dark
-          </button>
-        </div>
-
+      <div className="p-3 border-t border-[#1e1e1e] flex-shrink-0">
         {/* User Avatar — opens Profile/Settings/Logout menu */}
         <div className="relative">
           {isMenuOpen && (
@@ -279,7 +263,7 @@ export default function Sidebar() {
                   👤 Profile
                 </button>
                 <button
-                  onClick={() => { setIsMenuOpen(false); navigate('/settings') }}
+                  onClick={() => { setIsMenuOpen(false); openSettings() }}
                   className={`w-full text-left px-3 py-2 text-sm transition ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
                 >
                   ⚙️ Settings

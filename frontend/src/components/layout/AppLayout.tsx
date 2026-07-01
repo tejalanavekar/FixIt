@@ -1,8 +1,9 @@
 // builds the  layout which is two columns, side bar on the left and main query writing for LLM on the right
 import Sidebar from '../layout/Sidebar'
+import MiniSidebar from './MiniSidebar'
+import SettingsModal from './SettingsModal'
 import { useThemeStore } from '../../store/themeStore'
 import { useSidebarStore } from '../../store/sideBarStore'
-import MiniSidebar from './MiniSidebar'
 
 //props to basically define the structure of the layout and  pass on the content  to children (Home Page)
 interface AppLayoutProps {
@@ -21,6 +22,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <main className="flex-1 overflow-y-auto">
             {children}
         </main>
+        <SettingsModal />
         </div>
     )
 }

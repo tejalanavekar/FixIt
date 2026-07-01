@@ -1,5 +1,7 @@
 import Editor from '@monaco-editor/react'
 import { useThemeStore } from '../store/themeStore'
+import { useEditorSettingsStore } from '../store/editorSettingsStore'
+
 interface CodeEditorProps {
   value: string
   language: string
@@ -7,8 +9,9 @@ interface CodeEditorProps {
 }
 
 export default function CodeEditor({ value, language, onChange }: CodeEditorProps) {
-    const { isDark } = useThemeStore()
-    return (
+  const { isDark } = useThemeStore()
+  const { fontFamily, fontSize, tabSize, lineNumbers, wordWrap, minimap } = useEditorSettingsStore()
+  return (
     <Editor
       height="100%"
       language={language}
@@ -16,14 +19,15 @@ export default function CodeEditor({ value, language, onChange }: CodeEditorProp
       onChange={onChange}
       theme={isDark ? 'vs-dark' : 'vs-light'}
       options={{
-        fontSize: 14,
-        fontFamily: 'JetBrains Mono, Fira Code, monospace',
-        minimap: { enabled: false },
+        fontSize,
+        fontFamily: `${fontFamily}, monospace`,
+        tabSize,
+        minimap: { enabled: minimap },
         scrollBeyondLastLine: false,
-        lineNumbers: 'on',
+        lineNumbers: lineNumbers ? 'on' : 'off',
         renderLineHighlight: 'line',
         padding: { top: 16 },
-        wordWrap: 'on'
+        wordWrap: wordWrap ? 'on' : 'off',
       }}
     />
   )

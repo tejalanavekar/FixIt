@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Accent color — set dynamically by App.tsx via CSS custom properties.
+   Overrides Tailwind's hardcoded blue classes so every primary button/border/text
+   picks up the user's chosen accent without touching every component. */
+:root {
+  --fixit-accent: #3b82f6;
+  --fixit-accent-dark: #2563eb;
+}
+
+/* Solid backgrounds */
+.bg-blue-600 { background-color: var(--fixit-accent) !important; }
+.bg-blue-500 { background-color: var(--fixit-accent) !important; }
+.hover\:bg-blue-700:hover { background-color: var(--fixit-accent-dark) !important; }
+.hover\:bg-blue-600:hover { background-color: var(--fixit-accent) !important; }
+
+/* Text */
+.text-blue-500 { color: var(--fixit-accent) !important; }
+.text-blue-400 { color: var(--fixit-accent) !important; }
+.text-blue-300 { color: color-mix(in srgb, var(--fixit-accent) 70%, white) !important; }
+.hover\:text-blue-300:hover { color: color-mix(in srgb, var(--fixit-accent) 70%, white) !important; }
+
+/* Borders */
+.border-blue-500 { border-color: var(--fixit-accent) !important; }
+.focus\:border-blue-500:focus { border-color: var(--fixit-accent) !important; }
+.border-b-2.border-blue-500 { border-color: var(--fixit-accent) !important; }
