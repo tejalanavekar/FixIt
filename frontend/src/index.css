@@ -26,3 +26,4 @@
 .border-blue-500 { border-color: var(--fixit-accent) !important; }
 .focus\:border-blue-500:focus { border-color: var(--fixit-accent) !important; }
 .border-b-2.border-blue-500 { border-color: var(--fixit-accent) !important; }
+

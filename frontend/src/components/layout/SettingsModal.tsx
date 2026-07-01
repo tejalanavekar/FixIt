@@ -4,16 +4,18 @@ import { useThemeStore, type ThemeChoice } from '../../store/themeStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useEditorSettingsStore } from '../../store/editorSettingsStore'
 import { useAppearanceStore, ACCENT_HEX, type AccentColor } from '../../store/appearanceStore'
+import { User, Palette, Bell, Keyboard, Lock, CreditCard, LogOut, Sun, Moon, Monitor } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 type NavItem = 'account' | 'appearance' | 'notifications' | 'editor' | 'privacy' | 'billing'
 
-const NAV: { id: NavItem; label: string; icon: string }[] = [
-  { id: 'account', label: 'Account', icon: '👤' },
-  { id: 'appearance', label: 'Appearance', icon: '🎨' },
-  { id: 'notifications', label: 'Notifications', icon: '🔔' },
-  { id: 'editor', label: 'Editor', icon: '⌨️' },
-  { id: 'privacy', label: 'Privacy', icon: '🔒' },
-  { id: 'billing', label: 'Billing', icon: '💳' },
+const NAV: { id: NavItem; label: string; icon: LucideIcon }[] = [
+  { id: 'account', label: 'Account', icon: User },
+  { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'editor', label: 'Editor', icon: Keyboard },
+  { id: 'privacy', label: 'Privacy', icon: Lock },
+  { id: 'billing', label: 'Billing', icon: CreditCard },
 ]
 
 // Reusable toggle button
@@ -178,14 +180,45 @@ export default function SettingsModal() {
     <>
       <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={close} />
 
-      <div className="fixed z-50 inset-0 flex items-center justify-center pointer-events-none">
+      {/* On mobile: full-screen. On desktop: centered modal max-w-2xl */}
+      <div className="fixed z-50 inset-0 flex md:items-center md:justify-center pointer-events-none">
         <div
-          className={`relative flex w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden pointer-events-auto ${bg} ${border}`}
-          style={{ maxHeight: '85vh', minHeight: 480 }}
+          className={`relative flex flex-col md:flex-row w-full md:max-w-2xl md:rounded-2xl border shadow-2xl overflow-hidden pointer-events-auto ${bg} ${border}`}
+          style={{ height: '100%', maxHeight: '100dvh', ...(window.innerWidth >= 768 ? { maxHeight: '85vh', minHeight: 480, height: 'auto' } : {}) }}
         >
 
-          {/* Left nav */}
-          <div className={`w-48 flex flex-col flex-shrink-0 border-r ${border} ${isDark ? 'bg-[#0f0f0f]' : 'bg-gray-50'} p-4`}>
+          {/* Mobile: horizontal tab strip at top */}
+          <div className={`md:hidden flex-shrink-0 border-b ${border} ${isDark ? 'bg-[#0f0f0f]' : 'bg-gray-50'}`}>
+            <div className="flex items-center justify-between px-4 pt-3 pb-1">
+              <h2 className={`text-sm font-semibold ${text}`}>Settings</h2>
+              <button onClick={close} className={`text-sm ${muted}`}>✕</button>
+            </div>
+            <div className="flex flex-wrap px-2 pb-2 gap-1">
+              {NAV.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition flex-shrink-0
+                    ${activeTab === item.id
+                      ? 'bg-blue-600 text-white font-medium'
+                      : isDark ? `${muted} hover:bg-[#1a1a1a]` : `${muted} hover:bg-white`
+                    }`}
+                >
+                  <item.icon size={14} />
+                  {item.label}
+                </button>
+              ))}
+              <button
+                onClick={async () => { await supabase.auth.signOut(); close(); window.location.href = '/signin' }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap text-red-400 hover:bg-red-500/10 transition flex-shrink-0"
+              >
+                <LogOut size={14} /> Sign out
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop: vertical left nav */}
+          <div className={`hidden md:flex w-48 flex-col flex-shrink-0 border-r ${border} ${isDark ? 'bg-[#0f0f0f]' : 'bg-gray-50'} p-4`}>
             <h2 className={`text-sm font-semibold mb-4 ${text}`}>Settings</h2>
             <nav className="flex-1 space-y-0.5">
               {NAV.map((item) => (
@@ -198,25 +231,25 @@ export default function SettingsModal() {
                       : isDark ? `${muted} hover:bg-[#1a1a1a] hover:text-white` : `${muted} hover:bg-white hover:text-gray-900`
                     }`}
                 >
-                  <span>{item.icon}</span>
+                  <item.icon size={15} />
                   {item.label}
                 </button>
               ))}
             </nav>
-
             <button
               onClick={async () => { await supabase.auth.signOut(); close(); window.location.href = '/signin' }}
               className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition mt-2"
             >
-              🚪 Sign out
+              <LogOut size={15} /> Sign out
             </button>
           </div>
 
           {/* Right content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+            {/* Close button desktop only — mobile uses ✕ in the tab strip */}
             <button
               onClick={close}
-              className={`absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full text-sm transition ${isDark ? `${muted} hover:bg-[#2a2a2a]` : `${muted} hover:bg-gray-100`}`}
+              className={`hidden md:flex absolute top-4 right-4 w-7 h-7 items-center justify-center rounded-full text-sm transition ${isDark ? `${muted} hover:bg-[#2a2a2a]` : `${muted} hover:bg-gray-100`}`}
             >
               ✕
             </button>
@@ -316,7 +349,7 @@ export default function SettingsModal() {
                         onClick={() => setTheme(t)}
                         className={`px-3 py-1.5 text-sm transition capitalize ${theme === t ? 'bg-blue-600 text-white' : isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
                       >
-                        {t === 'light' ? '☀️' : t === 'dark' ? '🌙' : '💻'} {t}
+                        {t === 'light' ? <Sun size={14} /> : t === 'dark' ? <Moon size={14} /> : <Monitor size={14} />} {t}
                       </button>
                     ))}
                   </div>

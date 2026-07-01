@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AppLayout from '../components/layout/AppLayout'
 import { useThemeStore } from '../store/themeStore'
 import { getProfileStats, type ProfileStats } from '../services/session.service'
+import { Clock, BookOpen, Brain, Flame } from 'lucide-react'
 
 function formatDate(iso: string) {
   const d = new Date(iso)
@@ -41,7 +42,7 @@ export default function ProfilePage() {
 
   return (
     <AppLayout>
-      <div className={`max-w-3xl mx-auto px-6 py-10 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div className={`max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10 ${isDark ? 'text-white' : 'text-gray-900'}`}>
 
         <button
           onClick={() => navigate('/home')}
@@ -62,24 +63,24 @@ export default function ProfilePage() {
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{stats.email}</p>
             {stats.memberSince && (
               <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                🕐 Member since {new Date(stats.memberSince).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                <Clock size={13} className="inline-block mr-1" /> Member since {new Date(stats.memberSince).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
               </p>
             )}
           </div>
         </div>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className={`rounded-xl p-4 border ${isDark ? 'border-[#2a2a2a] bg-[#111]' : 'border-gray-200 bg-white'}`}>
-            <p className="text-2xl font-bold">📚 {stats.totalSessions}</p>
+            <div className="flex items-center gap-2 text-2xl font-bold"><BookOpen size={22} /> {stats.totalSessions}</div>
             <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Total Sessions</p>
           </div>
           <div className={`rounded-xl p-4 border ${isDark ? 'border-[#2a2a2a] bg-[#111]' : 'border-gray-200 bg-white'}`}>
-            <p className="text-2xl font-bold">🧠 {stats.conceptsLearned}</p>
+            <div className="flex items-center gap-2 text-2xl font-bold"><Brain size={22} /> {stats.conceptsLearned}</div>
             <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Concepts Learned</p>
           </div>
           <div className={`rounded-xl p-4 border ${isDark ? 'border-[#2a2a2a] bg-[#111]' : 'border-gray-200 bg-white'}`}>
-            <p className="text-2xl font-bold">🔥 {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'}</p>
+            <div className="flex items-center gap-2 text-2xl font-bold"><Flame size={22} /> {stats.streakDays} {stats.streakDays === 1 ? 'day' : 'days'}</div>
             <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Current Streak</p>
           </div>
         </div>

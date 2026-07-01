@@ -42,13 +42,13 @@ export default function HomePage() {
   return (
     <AppLayout>
       
-    <div className={`flex flex-col items-center justify-center h-full px-8 ${isDark ? 'bg-[#0f0f0f]' : 'bg-[#f0f0f0]'}`}>
+    <div className={`flex flex-col items-center justify-center h-full px-4 md:px-8 ${isDark ? 'bg-[#0f0f0f]' : 'bg-[#f0f0f0]'}`}>
 
       {/* Heading */}
-      <h1 className={`text-4xl text-center mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+      <h1 className={`text-2xl md:text-4xl text-center mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
         What are you trying to understand today?
       </h1>
-      <p className={`text-center mb-8 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+      <p className={`text-sm md:text-base text-center mb-6 md:mb-8 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
         Paste an error, describe a bug, or ask how something works
       </p>
 

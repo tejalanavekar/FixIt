@@ -7,6 +7,7 @@ import { useSidebarStore } from '../../store/sideBarStore'
 import { useSessionsStore } from '../../store/sessionsStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { updateSession, deleteSession, type SessionRow } from '../../services/session.service'
+import { User, Settings, LogOut, Pin, Pencil, Trash2 } from 'lucide-react'
 
 function groupSessions(sessions: SessionRow[]) {
   const today = new Date()
@@ -38,6 +39,7 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const [session, setSession] = useState<Session | null>(null)
   const { sessions, loadSessions, setSessions } = useSessionsStore()
+  const { closeSidebar } = useSidebarStore()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -71,8 +73,11 @@ export default function Sidebar() {
     return email.charAt(0).toUpperCase()
   }
 
+  const closeOnMobile = () => { if (window.innerWidth < 768) closeSidebar() }
+
   const openSession = (s: SessionRow) => {
     navigate('/playground', { state: { userInput: s.user_input, sessionId: s.id } })
+    closeOnMobile()
   }
 
   const startRename = (s: SessionRow) => {
@@ -143,7 +148,7 @@ export default function Sidebar() {
                 className={`w-full text-left pl-2 pr-7 py-1.5 rounded-lg transition text-sm truncate flex items-center gap-1
                   ${isDark ? 'text-white hover:text-white hover:bg-[#1a1a1a]' : 'text-black hover:text-black hover:bg-gray-100'}`}
               >
-                {s.bookmarked && <span className="text-xs flex-shrink-0">📌</span>}
+                {s.bookmarked && <Pin size={12} className="flex-shrink-0" />}
                 <span className="truncate">{s.title}</span>
               </button>
             )}
@@ -170,21 +175,21 @@ export default function Sidebar() {
                   ${isDark ? 'bg-[#1a1a1a] border-[#2a2a2a]' : 'bg-white border-gray-200'}`}>
                   <button
                     onClick={() => handleTogglePin(s)}
-                    className={`w-full text-left px-3 py-2 text-sm transition ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
+                    className={`w-full text-left px-3 py-2 text-sm transition flex items-center gap-2 ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
                   >
-                    📌 {s.bookmarked ? 'Unpin' : 'Pin'}
+                    <Pin size={13} /> {s.bookmarked ? 'Unpin' : 'Pin'}
                   </button>
                   <button
                     onClick={() => startRename(s)}
-                    className={`w-full text-left px-3 py-2 text-sm transition ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
+                    className={`w-full text-left px-3 py-2 text-sm transition flex items-center gap-2 ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
                   >
-                    ✏️ Rename
+                    <Pencil size={13} /> Rename
                   </button>
                   <button
                     onClick={() => handleDelete(s)}
-                    className={`w-full text-left px-3 py-2 text-sm transition text-red-400 ${isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'}`}
+                    className={`w-full text-left px-3 py-2 text-sm transition flex items-center gap-2 text-red-400 ${isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'}`}
                   >
-                    🗑️ Delete
+                    <Trash2 size={13} /> Delete
                   </button>
                 </div>
               </>
@@ -222,7 +227,7 @@ export default function Sidebar() {
       {/*New Session Button */}
       <div className="p-3 pt-1 pb-3">
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => { navigate('/home'); closeOnMobile() }}
           className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border transition text-sm
             ${isDark
               ? 'border-gray-300 text-white hover:text-white hover:bg-[#1a1a1a] hover:border-[#3a3a3a]'
@@ -257,22 +262,22 @@ export default function Sidebar() {
               <div className={`absolute bottom-full left-0 mb-2 w-full rounded-lg border shadow-lg z-20 overflow-hidden
                 ${isDark ? 'bg-[#1a1a1a] border-[#2a2a2a]' : 'bg-white border-gray-200'}`}>
                 <button
-                  onClick={() => { setIsMenuOpen(false); navigate('/profile') }}
-                  className={`w-full text-left px-3 py-2 text-sm transition ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
+                  onClick={() => { setIsMenuOpen(false); navigate('/profile'); closeOnMobile() }}
+                  className={`w-full text-left px-3 py-2 text-sm transition flex items-center gap-2 ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
                 >
-                  👤 Profile
+                  <User size={14} /> Profile
                 </button>
                 <button
                   onClick={() => { setIsMenuOpen(false); openSettings() }}
-                  className={`w-full text-left px-3 py-2 text-sm transition ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
+                  className={`w-full text-left px-3 py-2 text-sm transition flex items-center gap-2 ${isDark ? 'text-white hover:bg-[#2a2a2a]' : 'text-gray-900 hover:bg-gray-100'}`}
                 >
-                  ⚙️ Settings
+                  <Settings size={14} /> Settings
                 </button>
                 <button
                   onClick={handleLogout}
-                  className={`w-full text-left px-3 py-2 text-sm transition text-red-400 ${isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'}`}
+                  className={`w-full text-left px-3 py-2 text-sm transition flex items-center gap-2 text-red-400 ${isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'}`}
                 >
-                  🚪 Logout
+                  <LogOut size={14} /> Logout
                 </button>
               </div>
             </>

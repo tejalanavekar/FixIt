@@ -5,6 +5,7 @@ import { generateSandbox, retryQuiz } from '../services/sandbox.service'
 import { createSession, updateSession, updateSandbox as persistSandbox, submitAttempt, getSessionDetail, sandboxRowToResponse } from '../services/session.service'
 import AppLayout from '../components/layout/AppLayout'
 import { useThemeStore } from '../store/themeStore'
+import { Home, Pencil, Code2, Lightbulb, Pin, CheckCircle } from 'lucide-react'
 import ConceptCard from './ConceptCard'
 import CodeEditor from './CodeEditor'
 import HintsPanel from './HintsPanel'
@@ -30,12 +31,20 @@ export default function PlaygroundPage() {
     const [sessionId, setSessionId] = useState<string | null>(resumedSessionId ?? null)
     const [isQuizCorrect, setIsQuizCorrect] = useState<boolean | null>(null)
     const [isRetryingQuiz, setIsRetryingQuiz] = useState(false)
+    const [mobileTab, setMobileTab] = useState<'code' | 'info'>('code')
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
     // Tracks which navigation (session id, or a fresh prompt) this component last loaded.
     // The same /playground route instance is reused across sidebar clicks (no remount),
     // so without this every other session would keep showing the first one's content.
     // Comparing against the key also absorbs React StrictMode's double-invoke in dev,
     // which would otherwise call fetchSandbox twice and create two sessions per prompt.
     const loadedKeyRef = useRef<string | null>(null)
+
+    useEffect(() => {
+      const handler = () => setIsMobile(window.innerWidth < 768)
+      window.addEventListener('resize', handler)
+      return () => window.removeEventListener('resize', handler)
+    }, [])
 
     useEffect(() => {
         if (!userInput && !resumedSessionId) {
@@ -226,7 +235,7 @@ useEffect(() => {
       <div className="flex flex-col h-full">
 
         {/* Top Bar */}
-        <div className={`flex items-center justify-between px-6 py-3 border-b ${
+        <div className={`flex items-center justify-between px-3 md:px-6 py-3 border-b ${
   isDark ? 'border-gray-500' : 'border-gray-200'
 }`}>
           <span className={`text-sm font-mono ${
@@ -241,7 +250,7 @@ useEffect(() => {
     : 'text-gray-700 hover:text-gray-900'
 }`}
             >
-              🏠 Home
+              <Home size={14} /> Home
             </button>
             <button
               onClick={handleGoHome}
@@ -251,28 +260,41 @@ useEffect(() => {
     : 'text-gray-700 hover:text-gray-900'
 }`}
             >
-              ✏️ Edit
+              <Pencil size={14} /> Edit
             </button>
           </div>
         </div>
 
         {/* Concept Card — always visible */}
-        <div
-  className={`border-b ${
-    isDark ? 'border-gray-500' : 'border-gray-200'
-  }`}
->
-        <ConceptCard
-          sandbox={sandbox}
-          onLearnMore={() => setIsDrawerOpen(true)}
-        />
+        <div className={`border-b ${isDark ? 'border-gray-500' : 'border-gray-200'}`}>
+          <ConceptCard sandbox={sandbox} onLearnMore={() => setIsDrawerOpen(true)} />
+        </div>
+
+        {/* Mobile tab bar — Code / Hints switcher */}
+        <div className={`md:hidden flex border-b flex-shrink-0 ${isDark ? 'border-[#1e1e1e]' : 'border-gray-200'}`}>
+          {(['code', 'info'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setMobileTab(tab)}
+              className={`flex-1 py-2.5 text-sm font-medium transition border-b-2 ${
+                mobileTab === tab
+                  ? 'border-blue-500 text-blue-500'
+                  : `border-transparent ${isDark ? 'text-gray-400' : 'text-gray-500'}`
+              }`}
+            >
+              {tab === 'code' ? <Code2 size={14} /> : <Lightbulb size={14} />} {tab === 'code' ? 'Code' : 'Hints'}
+            </button>
+          ))}
         </div>
 
         {/* Main Content */}
         <div className="flex flex-1 overflow-hidden">
 
-          {/* Left — Code Editor */}
-          <div className="flex flex-col overflow-hidden" style={{ width: `${leftWidth}%` }}>
+          {/* Left — Code Editor (scrollable on mobile, fixed split on desktop) */}
+          <div
+            className={`flex-col overflow-y-auto md:overflow-hidden ${mobileTab === 'code' ? 'flex' : 'hidden'} md:flex`}
+            style={{ width: isMobile ? '100%' : `${leftWidth}%` }}
+          >
 
             {/* Editor Header */}
             <div className={`flex items-center justify-between px-4 py-2 border-b ${
@@ -295,8 +317,8 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* Monaco Editor */}
-            <div className="flex-1 overflow-hidden">
+            {/* Monaco Editor — fixed height on mobile so quiz/task scroll below it */}
+            <div className="h-56 md:h-auto md:flex-1 overflow-hidden flex-shrink-0">
               <CodeEditor
                 value={userCode}
                 language={sandbox.language}
@@ -312,7 +334,7 @@ useEffect(() => {
     : 'border-blue-200 bg-blue-50'
 }`}>
                 <p className="text-blue-400 text-sm font-semibold mb-1">
-                  📌 Your task
+                  <Pin size={14} className="inline-block mr-1" /> Your task
                 </p>
                 <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{sandbox.task}</p>
               </div>
@@ -370,21 +392,21 @@ useEffect(() => {
 
                 {selectedAnswer !== null && isQuizCorrect === true && (
                   <div className="mt-3 flex items-center justify-between">
-                    <span className="text-green-400 text-xs">Nailed it! 🎉</span>
+                    <span className="text-green-400 text-xs flex items-center gap-1">Nailed it! <CheckCircle size={13} /></span>
                     <button
                       onClick={handleGoHome}
                       className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition"
                     >
-                      🏠 Home
+                      <Home size={14} /> Home
                     </button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Bottom Actions */}
-            <div className={`flex items-center justify-between px-4 py-3 border-t ${
-  isDark ? 'border-[#1e1e1e]' : 'border-gray-200'
+            {/* Bottom Actions — sticky on mobile so Submit is always reachable */}
+            <div className={`flex items-center justify-between px-4 py-3 border-t sticky bottom-0 md:static ${
+  isDark ? 'border-[#1e1e1e] bg-[#111]' : 'border-gray-200 bg-white'
 }`}>
               <button
                 onClick={handleSubmit}
@@ -414,37 +436,19 @@ useEffect(() => {
 
           </div>
 
+          {/* Drag divider — desktop only */}
           <div
-  onMouseDown={() => setIsDragging(true)}
-  className="
-    w-2
-    relative
-    cursor-col-resize
-    hover:bg-blue-500/10
-    transition
-    flex-shrink-0
-  "
->
-  <div
-    className="
-      absolute
-      left-1/2
-      top-0
-      -translate-x-1/2
-      h-full
-      w-[1px]
-      bg-[#2a2a2a]
-    "
-  />
-</div>
+            onMouseDown={() => setIsDragging(true)}
+            className="hidden md:block w-2 relative cursor-col-resize hover:bg-blue-500/10 transition flex-shrink-0"
+          >
+            <div className="absolute left-1/2 top-0 -translate-x-1/2 h-full w-[1px] bg-[#2a2a2a]" />
+          </div>
 
-          {/* Right — Hints Panel */}
+          {/* Right — Hints Panel (full screen on mobile when info tab active) */}
           <div
-  style={{
-    width: `${100 - leftWidth}%`,
-  }}
-  className="overflow-hidden"
->
+            className={`overflow-hidden ${mobileTab === 'info' ? 'flex flex-col' : 'hidden'} md:block`}
+            style={{ width: isMobile ? '100%' : `${100 - leftWidth}%` }}
+          >
   <HintsPanel
     hints={sandbox.hints}
     explanation={sandbox.conceptOverview}

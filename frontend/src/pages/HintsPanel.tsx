@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useThemeStore } from "../store/themeStore";
+import { Lock, Eye, AlertTriangle, ClipboardCopy, Check } from 'lucide-react';
 
 interface HintsPanelProps {
   hints: string[];
@@ -70,7 +71,7 @@ export default function HintsPanel({
               }
             `}
           >
-            {tab === "solution" && !showSolution ? "🔒 " : ""}
+            {tab === "solution" && !showSolution ? <><Lock size={13} className="inline-block" />{' '}</> : null}
             {tab}
           </button>
         ))}
@@ -114,7 +115,7 @@ export default function HintsPanel({
                           : "text-blue-600 hover:text-blue-700"
                       }`}
                     >
-                      👁 Reveal
+                      <Eye size={14} /> Reveal
                     </button>
                   )}
                 </div>
@@ -160,7 +161,7 @@ export default function HintsPanel({
           <div>
             <div className="flex items-center justify-between mb-3">
               <p className="text-yellow-500 text-sm">
-                ⚠️ Try to solve it yourself first!
+                <AlertTriangle size={14} className="inline-block mr-1" /> Try to solve it yourself first!
               </p>
               <button
                 onClick={handleUseSolution}
@@ -170,7 +171,7 @@ export default function HintsPanel({
                     : "text-blue-600 hover:bg-gray-100"
                 }`}
               >
-                {justCopied ? "✅ Added to editor" : "📋 Use this code"}
+                {justCopied ? <Check size={14} /> : <ClipboardCopy size={14} />} {justCopied ? "Added to editor" : "Use this code"}
               </button>
             </div>
 
