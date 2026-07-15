@@ -208,7 +208,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-4 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center">
             <span className="text-white text-sm">⚡</span>
           </div>
           <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>FixIt</span>
@@ -240,7 +240,7 @@ export default function Sidebar() {
       </div>
 
       {/* Session History List — scrolls independently of the footer below */}
-      <div className="flex-1 overflow-y-auto px-3 py-2">
+      <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-hover">
         {renderSessionGroup('Today', groups.today)}
         {renderSessionGroup('Yesterday', groups.yesterday)}
         {renderSessionGroup('This Week', groups.thisWeek)}
@@ -249,7 +249,7 @@ export default function Sidebar() {
       </div>
 
       {/* Footer — fixed at the bottom, never scrolls with the session list */}
-      <div className="p-3 border-t border-[#1e1e1e] flex-shrink-0">
+      <div className={`p-3 border-t flex-shrink-0 ${isDark ? 'border-[#1e1e1e]' : 'border-gray-100'}`}>
         {/* User Avatar — opens Profile/Settings/Logout menu */}
         <div className="relative">
           {isMenuOpen && (

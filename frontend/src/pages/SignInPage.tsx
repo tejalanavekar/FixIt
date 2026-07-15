@@ -55,7 +55,7 @@ export default function SignInPage() {
       
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+        <div className="w-10 h-10 bg-[#2563eb] rounded-lg flex items-center justify-center">
           <span className="text-white text-xl">⚡</span>
         </div>
         <span className="text-white text-2xl font-semibold">FixIt</span>

@@ -13,7 +13,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { isSidebarOpen, toggleSidebar, closeSidebar } = useSidebarStore()
 
   return (
-    <div className={`flex h-screen overflow-hidden ${isDark ? 'bg-[#0f0f0f]' : 'bg-gray-50'}`}>
+    <div className={`relative flex h-screen overflow-hidden ${isDark ? 'bg-[#111]' : 'bg-white'}`}>
 
       {/* ── Desktop sidebar (inline in flex row) ── */}
       <div className="hidden md:block flex-shrink-0">
@@ -47,7 +47,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             ☰
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+            <div className="w-6 h-6 bg-[#2563eb] rounded flex items-center justify-center">
               <span className="text-white text-xs">⚡</span>
             </div>
             <span className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>FixIt</span>

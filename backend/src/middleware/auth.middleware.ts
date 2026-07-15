@@ -31,17 +31,18 @@ export const requireAuth = async (req: AuthedRequest, res: Response, next: NextF
     return res.status(401).json({ error: 'Missing access token' })
   }
 
-  const { data, error } = await supabase.auth.getUser(token)
-
-  if (error || !data.user) {
-    return res.status(401).json({ error: 'Invalid or expired session' })
-  }
-
   try {
+    const { data, error } = await supabase.auth.getUser(token)
+
+    if (error || !data.user) {
+      return res.status(401).json({ error: 'Invalid or expired session' })
+    }
+
     const dbId = await getOrCreateDbUserId(data.user.id, data.user.email)
     req.user = { authId: data.user.id, email: data.user.email, dbId }
     next()
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: 'Failed to resolve user profile' })
   }
 }

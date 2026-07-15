@@ -383,10 +383,6 @@ export default function SettingsModal() {
                     <option value="spacious">Spacious</option>
                   </select>
                 </div>
-
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition">
-                  Save changes
-                </button>
               </div>
             )}
 

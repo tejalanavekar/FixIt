@@ -6,20 +6,15 @@ export default function MiniSidebar() {
   const { isDark } = useThemeStore()
 
   return (
-    <div className={`w-12 border-r flex flex-col items-center py-4 ${isDark ? 'bg-[#111] border-[#1e1e1e]'
-      : 'bg-white border-gray-200'}`}>
-
-      <button
-    onClick={toggleSidebar}
-    className={`text-2xl transition-colors ${
-      isDark
-        ? 'text-gray-400 hover:text-white'
-        : 'text-gray-600 hover:text-black'
-    }`}
-  >
-    ☰
-  </button>
-
-    </div>
+    <button
+      onClick={toggleSidebar}
+      className={`absolute top-4 left-4 z-10 text-2xl transition-colors ${
+        isDark
+          ? 'text-gray-400 hover:text-white'
+          : 'text-gray-600 hover:text-black'
+      }`}
+    >
+      ☰
+    </button>
   )
 }

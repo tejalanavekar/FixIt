@@ -27,3 +27,15 @@
 .focus\:border-blue-500:focus { border-color: var(--fixit-accent) !important; }
 .border-b-2.border-blue-500 { border-color: var(--fixit-accent) !important; }
 
+/* Scrollbar hidden until the container is hovered (and only shows if content overflows) */
+.scrollbar-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.scrollbar-hover:hover {
+  scrollbar-color: rgba(128, 128, 128, 0.5) transparent;
+}
+.scrollbar-hover::-webkit-scrollbar { width: 6px; }
+.scrollbar-hover::-webkit-scrollbar-thumb { background-color: transparent; border-radius: 3px; }
+.scrollbar-hover:hover::-webkit-scrollbar-thumb { background-color: rgba(128, 128, 128, 0.5); }
+
